@@ -1,0 +1,53 @@
+{
+  "description": "message-forwarding",
+  "states": [
+    {
+      "name": "Trigger",
+      "type": "trigger",
+      "transitions": [
+        {
+          "next": "forward_message",
+          "event": "incomingMessage"
+        },
+        {
+          "event": "incomingCall"
+        },
+        {
+          "event": "incomingRequest"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": 380,
+          "y": 70
+        }
+      }
+    },
+    {
+      "name": "forward_message",
+      "type": "send-message",
+      "transitions": [
+        {
+          "event": "sent"
+        },
+        {
+          "event": "failed"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": 380,
+          "y": 300
+        },
+        "from": "{{flow.channel.address}}",
+        "attributes": "{{contact.channel.address}}",
+        "to": "+19148067581",
+        "body": "New Message\nfrom: {{trigger.message.From}} \nTo: {{trigger.message.To}} \nMessage: {{trigger.message.Body}}"
+      }
+    }
+  ],
+  "initial_state": "Trigger",
+  "flags": {
+    "allow_concurrent_calls": true
+  }
+}
