@@ -1,0 +1,225 @@
+{
+  "description": "IVR",
+  "states": [
+    {
+      "name": "Trigger",
+      "type": "trigger",
+      "transitions": [
+        {
+          "event": "incomingMessage"
+        },
+        {
+          "next": "gather_input_with_greeting",
+          "event": "incomingCall"
+        },
+        {
+          "event": "incomingRequest"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": 250,
+          "y": 50
+        }
+      }
+    },
+    {
+      "name": "gather_input_with_greeting",
+      "type": "gather-input-on-call",
+      "transitions": [
+        {
+          "next": "first_key_press",
+          "event": "keypress"
+        },
+        {
+          "event": "speech"
+        },
+        {
+          "next": "end_call",
+          "event": "timeout"
+        }
+      ],
+      "properties": {
+        "play": "https://orchid-numbat-2390.twil.io/assets/greeting-spam-filter.wav",
+        "voice": "man",
+        "number_of_digits": 1,
+        "speech_timeout": "auto",
+        "offset": {
+          "x": 290,
+          "y": 300
+        },
+        "loop": 1,
+        "finish_on_key": "",
+        "language": "en",
+        "stop_gather": true,
+        "gather_language": "en",
+        "profanity_filter": "true",
+        "timeout": 10
+      }
+    },
+    {
+      "name": "first_key_press",
+      "type": "split-based-on",
+      "transitions": [
+        {
+          "event": "noMatch"
+        },
+        {
+          "next": "connect_call_to_cell",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "1",
+              "arguments": [
+                "{{widgets.gather_input_with_greeting.Digits}}"
+              ],
+              "type": "equal_to",
+              "value": "1"
+            }
+          ]
+        },
+        {
+          "next": "fat_finger",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "If value matches_any_of 2, 4, 5",
+              "arguments": [
+                "{{widgets.gather_input_with_greeting.Digits}}"
+              ],
+              "type": "matches_any_of",
+              "value": "2, 4, 5"
+            }
+          ]
+        }
+      ],
+      "properties": {
+        "input": "{{widgets.gather_input_with_greeting.Digits}}",
+        "offset": {
+          "x": 120,
+          "y": 610
+        }
+      }
+    },
+    {
+      "name": "connect_call_to_cell",
+      "type": "connect-call-to",
+      "transitions": [
+        {
+          "event": "callCompleted"
+        }
+      ],
+      "properties": {
+        "offset": {
+          "x": 370,
+          "y": 1230
+        },
+        "caller_id": "{{contact.channel.address}}",
+        "noun": "number",
+        "to": "+19148067581",
+        "timeout": 30
+      }
+    },
+    {
+      "name": "end_call",
+      "type": "say-play",
+      "transitions": [
+        {
+          "event": "audioComplete"
+        }
+      ],
+      "properties": {
+        "play": "https://orchid-numbat-2390.twil.io/assets/no-input.wav",
+        "voice": "default",
+        "offset": {
+          "x": 630,
+          "y": 610
+        },
+        "loop": 1,
+        "language": "en-US"
+      }
+    },
+    {
+      "name": "fat_finger",
+      "type": "gather-input-on-call",
+      "transitions": [
+        {
+          "next": "second_key_press",
+          "event": "keypress"
+        },
+        {
+          "event": "speech"
+        },
+        {
+          "next": "end_call",
+          "event": "timeout"
+        }
+      ],
+      "properties": {
+        "play": "https://orchid-numbat-2390.twil.io/assets/fat-finger.wav",
+        "voice": "man",
+        "number_of_digits": 1,
+        "speech_timeout": "auto",
+        "offset": {
+          "x": -470,
+          "y": 390
+        },
+        "loop": 1,
+        "finish_on_key": "",
+        "language": "en",
+        "stop_gather": true,
+        "gather_language": "en",
+        "profanity_filter": "true",
+        "timeout": 10
+      }
+    },
+    {
+      "name": "second_key_press",
+      "type": "split-based-on",
+      "transitions": [
+        {
+          "event": "noMatch"
+        },
+        {
+          "next": "connect_call_to_cell",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "1",
+              "arguments": [
+                "{{widgets.fat_finger.Digits}}"
+              ],
+              "type": "equal_to",
+              "value": "1"
+            }
+          ]
+        },
+        {
+          "next": "fat_finger",
+          "event": "match",
+          "conditions": [
+            {
+              "friendly_name": "If value matches_any_of 2, 4, 5",
+              "arguments": [
+                "{{widgets.fat_finger.Digits}}"
+              ],
+              "type": "matches_any_of",
+              "value": "2, 4, 5"
+            }
+          ]
+        }
+      ],
+      "properties": {
+        "input": "{{widgets.fat_finger.Digits}}",
+        "offset": {
+          "x": -430,
+          "y": 920
+        }
+      }
+    }
+  ],
+  "initial_state": "Trigger",
+  "flags": {
+    "allow_concurrent_calls": true
+  }
+}
